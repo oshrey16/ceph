@@ -269,22 +269,32 @@ protected:
   class DBZone : public StoreZone {
     protected:
       DBStore* store;
-      RGWRealm *realm{nullptr};
-      DBZoneGroup *zonegroup{nullptr};
-      RGWZone *zone_public_config{nullptr}; /* external zone params, e.g., entrypoints, log flags, etc. */
-      RGWZoneParams *zone_params{nullptr}; /* internal zone params, e.g., rados pools */
-      RGWPeriod *current_period{nullptr};
+      // RGWRealm *realm{nullptr};
+      std::unique_ptr<RGWRealm> realm;
+      // DBZoneGroup *zonegroup{nullptr};
+      std::unique_ptr<DBZoneGroup> zonegroup;
+      // RGWZone *zone_public_config{nullptr}; /* external zone params, e.g., entrypoints, log flags, etc. */
+      std::unique_ptr<RGWZone> zone_public_config;
+      // RGWZoneParams *zone_params{nullptr}; /* internal zone params, e.g., rados pools */
+      std::unique_ptr<RGWZoneParams> zone_params;
+      // RGWPeriod *current_period{nullptr};
+      std::unique_ptr<RGWPeriod> current_period;
 
     public:
       DBZone(DBStore* _store) : store(_store) {
-	realm = new RGWRealm();
+	// realm = new RGWRealm();
+  realm = std::make_unique<RGWRealm>();
 	std::unique_ptr<RGWZoneGroup> rzg = std::make_unique<RGWZoneGroup>("default", "default");
 	rzg->api_name = "default";
 	rzg->is_master = true;
-        zonegroup = new DBZoneGroup(store, std::move(rzg));
-        zone_public_config = new RGWZone();
-        zone_params = new RGWZoneParams();
-        current_period = new RGWPeriod();
+        // zonegroup = new DBZoneGroup(store, std::move(rzg));
+        // zone_public_config = new RGWZone();
+        // zone_params = new RGWZoneParams();
+        // current_period = new RGWPeriod();
+        zonegroup = std::make_unique<DBZoneGroup>(store, std::move(rzg));
+        zone_public_config = std::make_unique<RGWZone>();
+        zone_params = std::make_unique<RGWZoneParams>();
+        current_period = std::make_unique<RGWPeriod>();
 
         // XXX: only default and STANDARD supported for now
         RGWZonePlacementInfo info;
@@ -294,11 +304,11 @@ protected:
         zone_params->placement_pools["default"] = info;
       }
       ~DBZone() {
-	delete realm;
-	delete zonegroup;
-	delete zone_public_config;
-	delete zone_params;
-	delete current_period;
+	// delete realm;
+	// delete zonegroup;
+	// delete zone_public_config;
+	// delete zone_params;
+	// delete current_period;
       }
 
       virtual std::unique_ptr<Zone> clone() override {
